@@ -11,7 +11,7 @@
 
 import numpy as np
 import math
-import sklearn
+from sklearn.cluster import KMeans
 
 class KernelOperations:
 
@@ -122,12 +122,21 @@ class KernelOperations:
         # ----- L: Normalised Laplacian
         L = np.eye(num_samples) - np.dot(np.linalg.inv(D),K)
 
-        # ----- E: Eigen Matrix containing
-        _, E = np.linalg.eig(L)
-        E = E[:,:num_clusters] 
+        # ----- Find Eigen vectors for the Laplacian
+        eigenValues, eigenVectors = np.linalg.eig(L)
+
+        # ----- sort eigen vectors in the order of increasing eigen values
+        idx = eigenValues.argsort()
+        eigenValues = eigenValues[idx]
+        eigenVectors = eigenVectors[:,idx]
+
+        # ----- E: Eigen Matrix containing num_clusters Eigenvectors as columns (sorted as: lowest to highest eigenvalues)
+        E = eigenVectors[:,:num_clusters]
 
         # ----- perform k-means on the rows of E
-        ret_val = sklearn.cluster.KMeans(n_clusters=num_clusters, random_state=0).fit_predict(E)
+        ret_val = KMeans(n_clusters=num_clusters, random_state=0).fit_predict(E)
+
+        return ret_val
 
 
 
@@ -198,5 +207,9 @@ if __name__ == '__main__':
 
     ko = KernelOperations()
 
-    print ko.bhattacharya_kernel(d1,d2)
+    # print ko.bhattacharya_kernel(d1,d2)
     # print ko.bhattacharya_distance(d1,d2)
+
+    lst = [d1,d2,d1,d1,d1,d2]
+
+    print ko.cluster_kernels(lst,2)

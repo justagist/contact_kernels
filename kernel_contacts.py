@@ -11,6 +11,7 @@
 
 import numpy as np
 import math
+import sklearn
 
 class KernelOperations:
 
@@ -78,6 +79,56 @@ class KernelOperations:
         bat_distance=(0.125)*np.dot(np.dot(s.T,inv_cov_mean),s)+(0.5)*np.log(detmean/np.sqrt(det1*det2))
 
         return bat_distance
+
+    def cluster_kernels(self, list_of_cnt_dists, num_clusters):
+
+        '''
+            Clusters different contact distributions into K clusters (according to the main paper [2]).
+
+            Arguments:
+                list_of_cnt_dists: the list of ContactDistribution objects
+                num_clusters: Number of clusters
+
+            Returns:
+                ret_val: list of cluster IDs (representing the cluster to which the corresponding distribution belongs to)
+
+            [2]: https://link.springer.com/article/10.1007%2Fs10514-017-9651-z
+
+        '''
+
+        num_samples = len(list_of_cnt_dists)
+
+        assert num_clusters <= num_samples
+
+        D = K = np.zeros([num_samples, num_samples]) # D: Diagonal Matrix; K: Kernel Matrix
+
+        # ----- populate D and K matrices
+        for i in range(K.shape[0]):
+            for j in range(K.shape[1]):
+
+                K[i,j] = self.bhattacharya_kernel(list_of_cnt_dists[i], list_of_cnt_dists[j])
+
+                if i == j:
+
+                    this_sample = list_of_cnt_dists[i]
+
+                    total = 0
+                    for sample in list_of_cnt_dists:
+                        total += self.bhattacharya_kernel(this_sample, sample)
+
+                    D[i,j] = total
+
+
+        # ----- L: Normalised Laplacian
+        L = np.eye(num_samples) - np.dot(np.linalg.inv(D),K)
+
+        # ----- E: Eigen Matrix containing
+        _, E = np.linalg.eig(L)
+        E = E[:,:num_clusters] 
+
+        # ----- perform k-means on the rows of E
+        ret_val = sklearn.cluster.KMeans(n_clusters=num_clusters, random_state=0).fit_predict(E)
+
 
 
 class ContactDistribution:

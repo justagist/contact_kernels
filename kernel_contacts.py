@@ -100,8 +100,9 @@ class KernelOperations:
 
         assert num_clusters <= num_samples
 
-        D = K = np.zeros([num_samples, num_samples]) # D: Diagonal Matrix; K: Kernel Matrix
-
+        # Initialise D and K with zeros
+        D = np.zeros([num_samples, num_samples]) # D: Diagonal Matrix; 
+        K = np.zeros([num_samples, num_samples]) # K: Kernel Matrix
         # ----- populate D and K matrices
         for i in range(K.shape[0]):
             for j in range(K.shape[1]):
@@ -117,7 +118,6 @@ class KernelOperations:
                         total += self.bhattacharya_kernel(this_sample, sample)
 
                     D[i,j] = total
-
 
         # ----- L: Normalised Laplacian
         L = np.eye(num_samples) - np.dot(np.linalg.inv(D),K)
@@ -210,6 +210,6 @@ if __name__ == '__main__':
     # print ko.bhattacharya_kernel(d1,d2)
     # print ko.bhattacharya_distance(d1,d2)
 
-    lst = [d1,d2,d1,d1,d1,d2]
+    lst = [d1,d2,d1,d1,d1,d2,d2,d1,d2,d2]
 
     print ko.cluster_kernels(lst,2)

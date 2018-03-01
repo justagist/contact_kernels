@@ -4,9 +4,9 @@
 """
 
 '''
-    Currently creates distributions only from position of contact points. 
-
-        TODO: Include contact normal/contact force in the contact vector. Interaction frame, transformation from and to interaction frame.
+    -> Creates distributions from just contact points (and also with a combination of contact points and forces/normals.) 
+    -> Computes bhattacharya kernels and bhattacharya distances for kernels
+    -> Clusters contact distributions according to their 'similarity'
 '''
 
 import numpy as np
@@ -201,15 +201,19 @@ if __name__ == '__main__':
     pts = [(1,2,3),(3.4,2.1,55.3),(6,94,76),(-23,34,1.3)]
     pts1 = [(3,2,300),(3.4,20.1,-55.3),(3.4,2.1,55.3),(1,-2,3)]
     pts2 = [(1,2.1,3),(33.4,21.1,5.3)]
+    pts3 = [(2.3,4.3,4.4),(64.3,33.4,85.4)]
+    pts4 = [(13,24,36),(36.4,72.1,565.3),(65,944,736),(-223,434,-1.3)]
+    pts5 = [(-3,22,50),(13.4,420.1,-55.3),(3.4,-2.1,-55.3),(1,-2,-3)]    
 
     d1 = ContactDistribution(pts,pts1)
-    d2 = ContactDistribution(pts2,pts2)
+    d2 = ContactDistribution(pts2,pts3)
+    d3 = ContactDistribution(pts4,pts5)
 
     ko = KernelOperations()
 
     # print ko.bhattacharya_kernel(d1,d2)
     # print ko.bhattacharya_distance(d1,d2)
 
-    lst = [d1,d2,d1,d1,d1,d2,d2,d1,d2,d2]
+    lst = [d1,d2,d1,d1,d1,d2,d2,d1,d2,d2,d3,d3,d3]
 
-    print ko.cluster_kernels(lst,2)
+    print ko.cluster_kernels(lst,3)
